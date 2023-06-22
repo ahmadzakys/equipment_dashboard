@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "equipment-dashboard",
+  "private_key_id": "a2d53f75059112f0b1bcf1cfefffdb54d29cf747",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDVoj6KKTPbASkx\nNjWB4kLaa7utl/e+0gORUT0on1I3ZfGYkVVVKSTuBpTdns4DnHx9M19KgyOkYPjO\nrACzsKOk7hn3Uuiar587JqLHM+dORhdb3CKvqpPOGNG1wFeBgAjJ54lEz3g3B6aZ\noK5kWQtpEUyKhVYRtdrvQuif2uv7m+5RzudUuLZ72Sshvsl/vDyeg2u2JNt/ubeX\nQvsI8M34G1jQPwLtqKjKW22Ih/sDoqP2Aj+nUhHEUmDC24K1g6Auh7VZJzl4whEm\nMLOdupVt56eIzlSjMCzQFlJZlHQLcbvoYY2PT82DNmJr+M2Jw0MW1e/+6L/uL0Si\nBv9te6fTAgMBAAECggEARu3CM97wL5NYGNW1uDTmG1zPiBg/kiRqONIvKxCSnIAF\nUbFXEppBf6HBxT8XiU1oa60lwzh9GfN0SDIFXaOVAYpoJpxpTAppJJt0Sg0qi+tr\nj/0rqwVIY5IL9nsw0ncu89Ii2izD7gllP/aAUCLcTfsHXapdZC3rzap6T7DAzt1g\nJgnaHC/1QUGQt5Mof4f+d5dH8CusxLL4Ead4IdWzEXntZ3ljFLpNcyFE3AJC6PQ+\n4DUfFiT0vBhQ9QhcUk6+wEbPkTQ/kyCXyXTl1Mv/JSdwEp53u2FYHDA5FT0WIPhy\nAYxrDse5pPaVxCA0hNPFlKzafHM4rPmfNdpO8/cZGQKBgQD2jU/iyZ4yf8C6HaDe\ntbyk/xT0S4wNjYuT0hLIiPDRXYnVJOyeAPLMv/8FNp00Rde4KAI7SyeuNNlNUjX3\nMdT9kJi3hLeXn8XpPKTq1Aa+fCnNwv65mDr8615CCtnbIGl/Gtm3M6xX8ACHnePd\no0QQ1Bfwe4DCuX9M4F8aC/EonwKBgQDd0gCuR7YhGGefNG0qv6Oil8Z53rl0KTid\nEAhNx7AE/YalB96nKWEWvnR0rpcsZv+kp6g7qlJVVe20R1LIuJn5ic7x4EwvplJl\na6BVtzKiZiDaQSC/FN/9+p85XOFoFHNrT5opE7tce8Jw2cDU4A7PVVB8O61L8sNg\n1ot5NUeQTQKBgAh6x7qXEJfQCQLdrgC642gRVdkpGAIHUjudSAQZoZ6xxuHLyU+N\n3Mvp9o1pWXLIzCiLR7heV1kIfEjKgQylbBvkczwsllvipN3mtg1ViX3Xq2BmSnh7\nodu9BJrk4KVGshorBD3myxCjMoF3jrS6vsaNZN1iggUweA5e0SaGLp8lAoGBAKgn\nN07mm+GQz5S3uH3sks6CAfqG5c1yJjGiYrkbxIqz6isWwSm1S51jOYLuizkkx2z5\nj6XTYuC/6Bd+7fmtP0QUvOVNJFQG4HVz1jLEUsUbaJIrRviziW3OXH+usk0lG63g\nxTuYcrMUOn00BWMaiv+PbBkRYDivyn6RhV+YDS0NAoGBALWbjKV4RwfE8wlJdwB0\n6I3yA7xYC5BTVAg46+FzT0jl57QWb+C5usTb9EN2wrVPL+9Pb6VN2h3ou/DMQxjG\n6Z12mrhFxX9KILj04/O5Wfe7mH4Ng0xuDpeRQlHxd1uAZOLBz1HJKV/SYQGHiUSN\nYxbzx84VchA9OS0kJCIEiVJS\n-----END PRIVATE KEY-----\n",
+  "client_email": "equipment-dashboard@equipment-dashboard.iam.gserviceaccount.com",
+  "client_id": "101736595979231541348",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/equipment-dashboard%40equipment-dashboard.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
