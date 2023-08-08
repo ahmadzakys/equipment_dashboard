@@ -337,11 +337,6 @@ def plot_aoh(value):
     return(fig)
 
 #-- 6. Plot Critical Space
-conveyor = 46
-df_conveyor = pd.DataFrame({'names' : ['progress',' '],
-                   'values' :  [conveyor, 100 - conveyor]})
-
-
 # plotly
 def plot_cs(df):
     color=''
@@ -476,6 +471,11 @@ for i in alternator_oh['Utilization %']:
 alternator_oh['Utilization'] = util
 alternator_oh['Max'] = 100
 
+#Critical Spare
+conveyor = last['Conveyor']
+df_conveyor = pd.DataFrame({'names' : ['progress',' '],
+                   'values' :  [conveyor, 100 - conveyor]})
+
 
 toh = plot_toh(engine_goh['TOH'])
 goh = plot_goh(engine_goh['GOH'])
@@ -484,6 +484,66 @@ crane_2 = plot_wr2(wire_rope_c2['Utilization'])
 cbu = plot_cbr(conveyor_br['Utilization'])
 au = plot_aoh(alternator_oh['Utilization'])
 cs_conveyor = plot_cs(df_conveyor)
+
+
+def shape_cu(value):
+    shape=''
+    if value == 'Green': shape="bi bi-check-square"
+    elif value == 'Yellow': shape="bi bi-x-square"
+    elif value == 'Red': shape="bi bi-x-square"
+    elif value == 'Gray': shape="bi bi-square"
+    return(shape)
+
+def col_cu(value):
+    col=''
+    if value == 'Green': col="bg-success"
+    elif value == 'Yellow': col="bg-warning"
+    elif value == 'Red': col="bg-danger"
+    elif value == 'Gray': col="bg-secondary"
+    return(col)
+
+def shape_cs(value):
+    shape=''
+    if value<=(50) : shape="bi bi-x-square"
+    elif value<=(80) : shape="bi bi-x-square"
+    elif value<=100 : shape="bi bi-check-square"
+    else : shape="bi bi-square"
+    return(shape)
+
+def col_cs(value):
+    col=''
+    if value<=(50) : col="bg-danger"
+    elif value<=(80) : col="bg-warning"
+    elif value<=100 : col="bg-success"
+    else : col="bg-secondary"
+    return(col)
+
+def col_day_delta(value):
+    col=''
+    if value<=180 : col="bg-danger"
+    elif value<=365 : col="bg-warning"
+    else: col="bg-success"
+    return(col)
+
+ConMakerShape = shape_cu(last['Conveyor-Maker Check-Up'])
+ConMakerCol = col_cu(last['Conveyor-Maker Check-Up'])
+CraneMakerShape = shape_cu(last['Crane-Maker Check-Up'])
+CraneMakerCol = col_cu(last['Crane-Maker Check-Up'])
+EngMakerShape = shape_cu(last['Engine-Maker Check-Up'])
+EngMakerCol = col_cu(last['Engine-Maker Check-Up'])
+OthersShape = shape_cu(last['Others'])
+OthersCol = col_cu(last['Others'])
+NextDockingCol = col_day_delta((last['Next Docking Intermediate Survey (IS)'] - pd.Timestamp.today()).days)
+ConSpareShape = shape_cu(last['Conveyor Belt Spares'])
+ConSpareCol = col_cu(last['Conveyor Belt Spares'])
+CraneSpareShape = shape_cu(last['Crane-Wire Rope Spares']) 
+CraneSpareCol = col_cu(last['Crane-Wire Rope Spares'])
+CraneShape = shape_cs(last['Crane'])
+CraneCol = col_cs(last['Crane'])
+ConShape = shape_cs(last['Conveyor'])
+ConCol = col_cs(last['Conveyor'])
+EngShape = shape_cs(last['Engine'])
+EngCol = col_cs(last['Engine'])
 
 ## -----LAYOUT-----
 layout = html.Div([
@@ -544,13 +604,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-x-square", style={
+                                html.Div(className=ConMakerShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-warning",
+                                className=ConMakerCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -569,13 +629,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-x-square", style={
+                                html.Div(className=CraneMakerShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-warning",
+                                className=CraneMakerCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -594,13 +654,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-check-square", style={
+                                html.Div(className=EngMakerShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-success",
+                                className=EngMakerCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -619,13 +679,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-square", style={
+                                html.Div(className=OthersShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-secondary",
+                                className=OthersCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -634,7 +694,7 @@ layout = html.Div([
                             dbc.Card(
                                 dbc.CardBody(
                                     [
-                                        html.P(children=[html.Strong('Next Docking Intermediate Survey (IS): 18 MAR 2025')],
+                                        html.P(children=[html.Strong('Next Docking Intermediate Survey (IS): ' + str(last['Next Docking Intermediate Survey (IS)'].strftime("%d %b %Y")))],
                                                 style={'textAlign': 'left', 
                                                     'fontSize': 15, 
                                                     'background-color':'white',
@@ -650,7 +710,7 @@ layout = html.Div([
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-success",
+                                className=NextDockingCol,
                                 color="light", outline=True, style={"height": 85, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -669,13 +729,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-x-square", style={
+                                html.Div(className=ConSpareShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-warning",
+                                className=ConSpareCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -694,13 +754,13 @@ layout = html.Div([
                                 ), color="light", outline=True, style={"height": 55, "margin-bottom": "5px"}
                             ),
                             dbc.Card(
-                                html.Div(className="bi bi-check-square", style={
+                                html.Div(className=CraneSpareShape, style={
                                                                         "color": "white",
                                                                         "textAlign": "center",
                                                                         "fontSize": 25,
                                                                         "margin": "auto",
                                                                     }),
-                                className="bg-success",
+                                className=CraneSpareCol,
                                 color="light", outline=True, style={"height": 55, "margin-bottom": "5px", "maxWidth": 75}
                             ),
                         ],),
@@ -723,13 +783,13 @@ layout = html.Div([
                                     ), color="light", outline=True, style={"height": 40, "margin-bottom": "0px"}
                                 ),
                                 dbc.Card(
-                                    html.Div(className="bi bi-square", style={
+                                    html.Div(className=CraneShape, style={
                                                                             "color": "white",
                                                                             "textAlign": "center",
                                                                             "fontSize": 17,
                                                                             "margin": "auto",
                                                                         }),
-                                    className="bg-secondary",
+                                    className=CraneCol,
                                     color="light", outline=True, style={"height": 40, "margin-bottom": "1px", "maxWidth": 25}
                                 ),
                             ],),
@@ -750,13 +810,13 @@ layout = html.Div([
                                         ), color="light", outline=True, style={"height": 40, "margin-bottom": "0px"}
                                     ),
                                     dbc.Card(
-                                        html.Div(className="bi bi-check-square", style={
+                                        html.Div(className=ConShape, style={
                                                                                 "color": "white",
                                                                                 "textAlign": "center",
                                                                                 "fontSize": 17,
                                                                                 "margin": "auto",
                                                                             }),
-                                        className="bg-danger",
+                                        className=ConCol,
                                         color="light", outline=True, style={"height": 40, "margin-bottom": "1px", "maxWidth": 25}
                                     ),
                                 ],),
@@ -777,13 +837,13 @@ layout = html.Div([
                                         ), color="light", outline=True, style={"height": 40, "margin-bottom": "0px"}
                                     ),
                                     dbc.Card(
-                                        html.Div(className="bi bi-square", style={
+                                        html.Div(className=EngShape, style={
                                                                                 "color": "white",
                                                                                 "textAlign": "center",
                                                                                 "fontSize": 17,
                                                                                 "margin": "auto",
                                                                             }),
-                                        className="bg-secondary",
+                                        className=EngCol,
                                         color="light", outline=True, style={"height": 40, "margin-bottom": "1px", "maxWidth": 25}
                                     ),
                                 ],),
