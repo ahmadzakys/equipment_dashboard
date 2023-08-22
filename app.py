@@ -72,4 +72,4 @@ def update_data(n):
 
 ######-----Start the Dash server-----#####
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server()
