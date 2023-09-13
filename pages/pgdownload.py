@@ -267,7 +267,7 @@ def update_charts(n_clicks, data):
 
     def to_pptx(bytes_io):
         # Create presentation
-        pptx = parent + '//' + 'ppt/slide_master.pptx'
+        pptx = parent + '//' + 'slide_master.pptx'
         prs = Presentation(pptx)
 
         # define slidelayouts 
