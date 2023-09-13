@@ -53,7 +53,7 @@ layout = html.Div([
 #### Callback Auto Update Chart & Data
 
 @callback(
-    [Output('download', 'data')],
+    Output('download', 'data'),
     [Input('download_button', 'n_clicks'),
      Input('store', 'data')]
 )
@@ -221,8 +221,8 @@ def update_charts(n_clicks, data):
         else: col="img/green calendar.png"
         return(col)
     
-    path = os.getcwd()  
-    parent = os.path.dirname(path)
+    # path = os.getcwd()  
+    # parent = os.path.dirname(path)
   
     t_sumatra = last['Next Docking Intermediate Survey (IS)']
     ConMakerShape_sumatra = shape_cu(last['Conveyor-Maker Check-Up'])
@@ -267,8 +267,8 @@ def update_charts(n_clicks, data):
 
     def to_pptx(bytes_io):
         # Create presentation
-        pptx = parent + '//' + 'slide_master.pptx'
-        prs = Presentation(pptx)
+        # pptx = parent + '//' + 'slide_master.pptx'
+        prs = Presentation('slide_master.pptx')
 
         # define slidelayouts 
         slide1 = prs.slides.add_slide(prs.slide_layouts[0])
