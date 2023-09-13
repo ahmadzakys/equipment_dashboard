@@ -221,7 +221,7 @@ def update_charts(n_clicks, data):
         else: col="img/green calendar.png"
         return(col)
     
-    # path = os.getcwd()  
+    path = os.getcwd()  
     # parent = os.path.dirname(path)
   
     t_sumatra = last['Next Docking Intermediate Survey (IS)']
@@ -267,8 +267,8 @@ def update_charts(n_clicks, data):
 
     def to_pptx(bytes_io):
         # Create presentation
-        # pptx = parent + '//' + 'slide_master.pptx'
-        prs = Presentation('slide_master.pptx')
+        pptx = path + '//' + 'slide_master.pptx'
+        prs = Presentation(pptx)
 
         # define slidelayouts 
         slide1 = prs.slides.add_slide(prs.slide_layouts[0])
