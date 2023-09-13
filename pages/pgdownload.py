@@ -220,6 +220,8 @@ def update_charts(n_clicks, data):
         else: col="img/green calendar.png"
         return(col)
 
+    path = os.path.dirname(__file__)
+
     t_sumatra = last['Next Docking Intermediate Survey (IS)']
     ConMakerShape_sumatra = shape_cu(last['Conveyor-Maker Check-Up'])
     CraneMakerShape_sumatra = shape_cu(last['Crane-Maker Check-Up'])
@@ -263,7 +265,7 @@ def update_charts(n_clicks, data):
 
     def to_pptx(bytes_io):
         # Create presentation
-        prs = Presentation('ppt/slide_master.pptx')
+        prs = Presentation(path + '//' + 'ppt/slide_master.pptx')
 
         # define slidelayouts 
         slide1 = prs.slides.add_slide(prs.slide_layouts[0])
