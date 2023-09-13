@@ -9,13 +9,14 @@ from dash.exceptions import PreventUpdate
 from pptx import Presentation
 from pptx.util import Cm, Pt
 
+import os
+
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 
-import os
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -28,13 +29,15 @@ layout = html.Div([
                 html.Br(),
                 
                 html.Div([
-                    html.P('Download slides here', id='date_download', style={'fontSize': 15, 'color':'#2a3f5f','font-family':'Verdana'}),
                     html.Button('Download Slides', 
                                       id='download_button', 
                                       n_clicks=0, 
                                       style={'fontSize': 15, 'color':'#2a3f5f','font-family':'Verdana','display': 'inline-block'}), 
-                    dcc.Download(id='download')
+                    dcc.Download(id='download'),
                     ]),
+
+                html.Br(),
+                html.P(id='download_date', style={'fontSize': 15, 'color':'#2a3f5f','font-family':'Verdana'}),
 
     html.Footer('ABL',
             style={'textAlign': 'center', 
@@ -53,7 +56,8 @@ layout = html.Div([
 #### Callback Auto Update Chart & Data
 
 @callback(
-    Output('download', 'data'),
+    [Output('download', 'data'),
+     Output('download_date', 'children')],
     [Input('download_button', 'n_clicks'),
      Input('store', 'data')]
 )
@@ -63,11 +67,14 @@ def update_charts(n_clicks, data):
     ######################
     # Pre Processing
     ######################
+
+    ###################### Sumatra ######################
     df_sumatra = pd.DataFrame(data['Bulk Sumatra'])
     df_sumatra = df_sumatra.replace(r'^\s*$', np.nan, regex=True)
 
     df_sumatra[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']] = \
     df_sumatra[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']].fillna(date.today())
+    df_sumatra['Date'] = pd.to_datetime(df_sumatra['Date'], dayfirst = True)
     df_sumatra['Last Overhaul GEN01'] = pd.to_datetime(df_sumatra['Last Overhaul GEN01'], dayfirst = True)
     df_sumatra['Last Overhaul GEN02'] = pd.to_datetime(df_sumatra['Last Overhaul GEN02'], dayfirst = True)
     df_sumatra['Last Overhaul GEN03'] = pd.to_datetime(df_sumatra['Last Overhaul GEN03'], dayfirst = True)
@@ -220,10 +227,10 @@ def update_charts(n_clicks, data):
         elif value<=365 : col="img/yellow calendar.png"
         else: col="img/green calendar.png"
         return(col)
-    
-    path = os.getcwd()  
-    # parent = os.path.dirname(path)
-  
+
+    path = os.getcwd()
+    download_date = html.Strong('Downloaded slides as per ' + str(last['Date'].strftime("%d %b %Y")))
+
     t_sumatra = last['Next Docking Intermediate Survey (IS)']
     ConMakerShape_sumatra = shape_cu(last['Conveyor-Maker Check-Up'])
     CraneMakerShape_sumatra = shape_cu(last['Crane-Maker Check-Up'])
@@ -236,8 +243,6 @@ def update_charts(n_clicks, data):
     ConShape_sumatra = shape_cs(last['Conveyor'])
     EngShape_sumatra = shape_cs(last['Engine'])
 
-    # download_date = html.Strong('Download slides as per ' + str(last['Date'].strftime("%d %b %Y")))
-    # download_date ='Text'
 
     #Chart
     sumatra_hou_c1 = plot_hou1(hou1)
@@ -265,9 +270,392 @@ def update_charts(n_clicks, data):
     pio.write_image(sumatra_cs_conveyor, 'img/cs_conveyor Bulk Sumatra.png')
     pio.write_image(sumatra_cs_engine, 'img/cs_engine Bulk Sumatra.png')
 
+    ###################### Derawan ######################
+    df_derawan = pd.DataFrame(data['Bulk Derawan'])
+    df_derawan = df_derawan.replace(r'^\s*$', np.nan, regex=True)
+
+    df_derawan[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']] = \
+    df_derawan[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']].fillna(date.today())
+    df_derawan['Last Overhaul GEN01'] = pd.to_datetime(df_derawan['Last Overhaul GEN01'], dayfirst = True)
+    df_derawan['Last Overhaul GEN02'] = pd.to_datetime(df_derawan['Last Overhaul GEN02'], dayfirst = True)
+    df_derawan['Last Overhaul GEN03'] = pd.to_datetime(df_derawan['Last Overhaul GEN03'], dayfirst = True)
+    df_derawan['Last Overhaul GEN04'] = pd.to_datetime(df_derawan['Last Overhaul GEN04'], dayfirst = True)
+    df_derawan['Next Docking Intermediate Survey (IS)'] = pd.to_datetime(df_derawan['Next Docking Intermediate Survey (IS)'], dayfirst = True)
+
+    df_derawan['Last RPL date Feeder'] = pd.to_datetime(df_derawan['Last RPL date Feeder'], dayfirst = True)
+    df_derawan['Last RPL date SHL'] = pd.to_datetime(df_derawan['Last RPL date SHL'], dayfirst = True)
+    last = df_derawan.iloc[-1]
+
+    # Wire Rope
+    wire_rope_c1 = [['HW RHOL', last['HW RHOL CR01'], last['CRANE 1']],
+                    ['HW LHOL', last['HW LHOL CR01'], last['CRANE 1']],
+                    ['CW RHOL', last['CW RHOL CR01'], last['CRANE 1']],
+                    ['CW LHOL', last['CW LHOL CR01'], last['CRANE 1']],
+                    ['EW RHOL', last['EW RHOL CR01'], last['CRANE 1']]]
+    wire_rope_c1 = pd.DataFrame(wire_rope_c1, columns=['Crane 1', 'Last Replacement', 'Current RH'])
+    wire_rope_c1['Utilization RH'] = wire_rope_c1['Current RH']-wire_rope_c1['Last Replacement']
+    wire_rope_c1['Utilization %'] = [round(wire_rope_c1['Utilization RH'][0]/2500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][1]/2500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][2]/2500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][3]/2500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][4]/1200*100,0),]
+    util1 = []
+    for i in wire_rope_c1['Utilization %']:
+        util1.append(min(i, 100))
+    wire_rope_c1['Utilization'] = util1
+    wire_rope_c1['Max'] = 100
+
+
+    wire_rope_c2 = [['HW RHOL', last['HW RHOL CR02'], last['CRANE 2']],
+                    ['HW LHOL', last['HW LHOL CR02'], last['CRANE 2']],
+                    ['CW RHOL', last['CW RHOL CR02'], last['CRANE 2']],
+                    ['CW LHOL', last['CW LHOL CR02'], last['CRANE 2']],
+                    ['EW RHOL', last['EW RHOL CR02'], last['CRANE 2']]]
+    wire_rope_c2 = pd.DataFrame(wire_rope_c2, columns=['Crane 2', 'Last Replacement', 'Current RH'])
+    wire_rope_c2['Utilization RH'] = wire_rope_c2['Current RH']-wire_rope_c2['Last Replacement']
+    wire_rope_c2['Utilization %'] = [round(wire_rope_c2['Utilization RH'][0]/2500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][1]/2500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][2]/2500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][3]/2500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][4]/1200*100,0),]
+    util2 = []
+    for i in wire_rope_c2['Utilization %']:
+        util2.append(min(i, 100))
+    wire_rope_c2['Utilization'] = util2
+    wire_rope_c2['Max'] = 100
+
+
+    # Engine GOH
+    engine_goh = [['DG1', last['DG1'], last['Last TOH DG1'], last['Last GOH DG1']],
+                ['DG2', last['DG2'], last['Last TOH DG2'], last['Last GOH DG2']],
+                ['DG3', last['DG3'], last['Last TOH DG3'], last['Last GOH DG3']],
+                ['EDG', last['AE'], last['Last TOH EDG'], last['Last GOH EDG']]]
+    engine_goh = pd.DataFrame(engine_goh, columns=['Derawan', 'Current HR', 'Last TOH', 'Last GOH'])
+    engine_goh['Last TOH'] = engine_goh['Last TOH'].fillna(0)
+    engine_goh['Utilization TOH'] = engine_goh['Current HR']-engine_goh['Last TOH']
+    engine_goh['Utilization GOH'] = engine_goh['Current HR']-engine_goh['Last GOH']
+    engine_goh['Hours till TOH'] = 12000-engine_goh['Utilization TOH']
+    engine_goh['Hours till GOH'] = 24000-engine_goh['Utilization GOH']
+    engine_goh['TOH %'] = round((1-engine_goh['Hours till TOH']/12000)*100,0)
+    engine_goh['GOH %'] = round((1-engine_goh['Hours till GOH']/24000)*100,0)
+
+    TOH = []
+    for i in engine_goh['TOH %']:
+        TOH.append(min(i, 100))
+    engine_goh['TOH'] = TOH
+
+    GOH = []
+    for i in engine_goh['GOH %']:
+        GOH.append(min(i, 100))
+    engine_goh['GOH'] = GOH
+
+    # Conveyor Belt Replacement
+    conveyor_br = [['Feeder', last['Last RPL date Feeder']],
+                ['SHL', last['Last RPL date SHL']]]
+    conveyor_br = pd.DataFrame(conveyor_br, columns=['Derawan', 'Last RPL date'])
+    conveyor_br['Last RPL date'] = conveyor_br['Last RPL date'].astype('datetime64[ns]')
+    conveyor_br['Todays Date'] = date.today()
+    conveyor_br['Todays Date'] = conveyor_br['Todays Date'].astype('datetime64[ns]')
+    conveyor_br['Time to Go (days)'] = (conveyor_br['Todays Date'] - conveyor_br['Last RPL date']).dt.days.astype('int64')
+    conveyor_br['Time to Go (months)'] = round(conveyor_br['Time to Go (days)']/30,2)
+    conveyor_br['Utilization %'] = round(conveyor_br['Time to Go (months)']/35*100,0)
+
+    util = []
+    for i in conveyor_br['Utilization %']:
+        util.append(min(i, 100))
+    conveyor_br['Utilization'] = util
+    conveyor_br['Max'] = 100
+
+    # Alternator OH
+    alternator_oh = [['GEN01', last['Last Overhaul GEN01'],],
+                    ['GEN02', last['Last Overhaul GEN02'],],
+                    ['GEN03', last['Last Overhaul GEN03'],],
+                    ['GEN04', last['Last Overhaul GEN04'],]]
+    alternator_oh = pd.DataFrame(alternator_oh, columns=['Derawan', 'Last Overhaul (Date)',])
+
+    last_oh = []
+    for i in alternator_oh['Last Overhaul (Date)']:
+        last_oh.append(i+relativedelta(months=60))
+    alternator_oh['Next Overhaul (Date)'] = last_oh
+
+    alternator_oh['Todays Date'] = date.today()
+    alternator_oh['Todays Date'] = alternator_oh['Todays Date'].astype('datetime64[ns]')
+    alternator_oh['Time to Go'] = (alternator_oh['Next Overhaul (Date)'] - alternator_oh['Todays Date']).dt.days.astype('int64')
+    alternator_oh['Five Years in Days'] = 1827
+    alternator_oh['Utilization %'] = round((alternator_oh['Five Years in Days']-alternator_oh['Time to Go'])/ \
+                                    alternator_oh['Five Years in Days']*100,0)
+
+    util = []
+    for i in alternator_oh['Utilization %']:
+        util.append(min(i, 100))
+    alternator_oh['Utilization'] = util
+    alternator_oh['Max'] = 100
+
+    #Critical Spare
+    conveyor = last['Conveyor']
+    df_conveyor = pd.DataFrame({'names' : ['progress',' '],
+                    'values' :  [conveyor, 100 - conveyor]})
+    
+    def shape_cu(value):
+        shape=''
+        if value == 'Green': shape="img/green check.png"
+        elif value == 'Yellow': shape="img/yellow cross.png"
+        elif value == 'Red': shape="img/red cross.png"
+        elif value == 'Gray': shape="img/gray blank.png"
+        return(shape)
+
+    def shape_cs(value):
+        shape=''
+        if value<=(50) : shape="img/red cross.png"
+        elif value<=(80) : shape="img/yellow cross.png"
+        elif value<=100 : shape="img/green check.png"
+        else : shape="img/gray blank.png"
+        return(shape)
+
+    def col_day_delta(value):
+        col=''
+        if value<=180 : col="img/red calendar.png"
+        elif value<=365 : col="img/yellow calendar.png"
+        else: col="img/green calendar.png"
+        return(col)
+
+    t_derawan = last['Next Docking Intermediate Survey (IS)']
+    ConMakerShape_derawan = shape_cu(last['Conveyor-Maker Check-Up'])
+    CraneMakerShape_derawan = shape_cu(last['Crane-Maker Check-Up'])
+    EngMakerShape_derawan = shape_cu(last['Engine-Maker Check-Up'])
+    OthersShape_derawan = shape_cu(last['Others'])
+    NextDockingCol_derawan = col_day_delta((last['Next Docking Intermediate Survey (IS)'] - pd.Timestamp.today()).days)
+    ConSpareShape_derawan = shape_cu(last['Conveyor Belt Spares'])
+    CraneSpareShape_derawan = shape_cu(last['Crane-Wire Rope Spares']) 
+    CraneShape_derawan = shape_cs(last['Crane'])
+    ConShape_derawan = shape_cs(last['Conveyor'])
+    EngShape_derawan = shape_cs(last['Engine'])
+
+    #Chart
+    derawan_toh = plot_toh(engine_goh['TOH'])
+    derawan_goh = plot_goh(engine_goh['GOH'])
+    derawan_crane_1 = plot_wr1_dk(wire_rope_c1['Utilization'], wire_rope_c1)
+    derawan_crane_2 = plot_wr2_dk(wire_rope_c2['Utilization'], wire_rope_c2)
+    derawan_cbu = plot_cbr(conveyor_br['Utilization'], 'Derawan', conveyor_br)
+    derawan_au = plot_aoh(alternator_oh['Utilization'], 'Derawan', alternator_oh)
+    derawan_cs_conveyor = plot_cs(df_conveyor)
+
+    #Save Img
+    pio.write_image(derawan_toh, 'img/toh Bulk Derawan.png')
+    pio.write_image(derawan_goh, 'img/goh Bulk Derawan.png')
+    pio.write_image(derawan_crane_1, 'img/crane_1 Bulk Derawan.png')
+    pio.write_image(derawan_crane_2, 'img/crane_2 Bulk Derawan.png')
+    pio.write_image(derawan_cbu, 'img/cbu Bulk Derawan.png')
+    pio.write_image(derawan_au, 'img/au Bulk Derawan.png')
+    pio.write_image(derawan_cs_conveyor, 'img/cs_conveyor Bulk Derawan.png')
+
+
+    ###################### Karimun ######################
+    df_karimun = pd.DataFrame(data['Bulk Karimun'])
+    df_karimun = df_karimun.replace(r'^\s*$', np.nan, regex=True)
+
+    df_karimun[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']] = \
+    df_karimun[['Last Overhaul GEN01', 'Last Overhaul GEN02', 'Last Overhaul GEN03', 'Last Overhaul GEN04']].fillna(date.today())
+    df_karimun['Last Overhaul GEN01'] = pd.to_datetime(df_karimun['Last Overhaul GEN01'], dayfirst = True)
+    df_karimun['Last Overhaul GEN02'] = pd.to_datetime(df_karimun['Last Overhaul GEN02'], dayfirst = True)
+    df_karimun['Last Overhaul GEN03'] = pd.to_datetime(df_karimun['Last Overhaul GEN03'], dayfirst = True)
+    df_karimun['Last Overhaul GEN04'] = pd.to_datetime(df_karimun['Last Overhaul GEN04'], dayfirst = True)
+    df_karimun['Next Docking Intermediate Survey (IS)'] = pd.to_datetime(df_karimun['Next Docking Intermediate Survey (IS)'], dayfirst = True)
+
+    last = df_karimun.iloc[-1]
+
+    # Wire Rope
+    wire_rope_c1 = [['HW RHOL', last['HW RHOL CR01'], last['CRANE 1']],
+                    ['HW LHOL', last['HW LHOL CR01'], last['CRANE 1']],
+                    ['GW RHOL', last['GW RHOL CR01'], last['CRANE 1']],
+                    ['GW LHOL', last['GW LHOL CR01'], last['CRANE 1']],
+                    ['EW RHOL', last['EW RHOL CR01'], last['CRANE 1']]]
+    wire_rope_c1 = pd.DataFrame(wire_rope_c1, columns=['Crane 1', 'Last Replacement', 'Current RH'])
+    wire_rope_c1['Utilization RH'] = wire_rope_c1['Current RH']-wire_rope_c1['Last Replacement']
+    wire_rope_c1['Utilization %'] = [round(wire_rope_c1['Utilization RH'][0]/2000*100,0),
+                                    round(wire_rope_c1['Utilization RH'][1]/2000*100,0),
+                                    round(wire_rope_c1['Utilization RH'][2]/2000*100,0),
+                                    round(wire_rope_c1['Utilization RH'][3]/2000*100,0),
+                                    round(wire_rope_c1['Utilization RH'][4]/1500*100,0),]
+    util1 = []
+    for i in wire_rope_c1['Utilization %']:
+        util1.append(min(i, 100))
+    wire_rope_c1['Utilization'] = util1
+    wire_rope_c1['Max'] = 100
+
+
+    wire_rope_c2 = [['HW RHOL', last['HW RHOL CR02'], last['CRANE 2']],
+                    ['HW LHOL', last['HW LHOL CR02'], last['CRANE 2']],
+                    ['GW RHOL', last['GW RHOL CR02'], last['CRANE 2']],
+                    ['GW LHOL', last['GW LHOL CR02'], last['CRANE 2']],
+                    ['EW RHOL', last['EW RHOL CR02'], last['CRANE 2']]]
+    wire_rope_c2 = pd.DataFrame(wire_rope_c2, columns=['Crane 2', 'Last Replacement', 'Current RH'])
+    wire_rope_c2['Utilization RH'] = wire_rope_c2['Current RH']-wire_rope_c2['Last Replacement']
+    wire_rope_c2['Utilization %'] = [round(wire_rope_c2['Utilization RH'][0]/2000*100,0),
+                                    round(wire_rope_c2['Utilization RH'][1]/2000*100,0),
+                                    round(wire_rope_c2['Utilization RH'][2]/2000*100,0),
+                                    round(wire_rope_c2['Utilization RH'][3]/2000*100,0),
+                                    round(wire_rope_c2['Utilization RH'][4]/1500*100,0),]
+    util2 = []
+    for i in wire_rope_c2['Utilization %']:
+        util2.append(min(i, 100))
+    wire_rope_c2['Utilization'] = util2
+    wire_rope_c2['Max'] = 100
+
+
+    # Engine GOH
+    engine_goh = [['DG1', last['MG1'], last['Last TOH DG1'], last['Last GOH DG1']],
+                ['DG2', last['MG2'], last['Last TOH DG2'], last['Last GOH DG2']],
+                ['DG3', last['MG3'], last['Last TOH DG3'], last['Last GOH DG3']],
+                ['EDG', last['HG'], last['Last TOH EDG'], last['Last GOH EDG']]]
+    engine_goh = pd.DataFrame(engine_goh, columns=['Karimun', 'Current HR', 'Last TOH', 'Last GOH'])
+    engine_goh['Last TOH'] = engine_goh['Last TOH'].fillna(0)
+    # engine_goh['Utilization TOH'] = 12000-engine_goh['Utilization GOH']
+    # engine_goh['Utilization GOH'] = 24000-engine_goh['Utilization GOH']
+    engine_goh['Hours till TOH'] = 12000-engine_goh['Last GOH']
+    engine_goh['Hours till GOH'] = 24000-engine_goh['Last GOH']
+    engine_goh['TOH %'] = round((1-engine_goh['Hours till TOH']/12000)*100,0)
+    engine_goh['GOH %'] = round((1-engine_goh['Hours till GOH']/24000)*100,0)
+
+    TOH = []
+    for i in engine_goh['TOH %']:
+        TOH.append(min(i, 100))
+    engine_goh['TOH'] = TOH
+
+    GOH = []
+    for i in engine_goh['GOH %']:
+        GOH.append(min(i, 100))
+    engine_goh['GOH'] = GOH
+
+    # Conveyor Belt Replacement
+    conveyor_br = [['FB01', last['FEEDER 1'], last['Last RPL HR FB01']],
+                ['FB02', last['FEEDER 2'], last['Last RPL HR FB02']],
+                ['CB1', last['CB1'], last['Last RPL HR CB1']],
+                ['CB2', last['CB2'], last['Last RPL HR CB2']],
+                ['CB3', last['CB3'], last['Last RPL HR CB3']],
+                ['CB4', last['CB4'], last['Last RPL HR CB4']],
+                ['SHL1', last['SHL1'], last['Last RPL HR SHL1']]]
+    conveyor_br = pd.DataFrame(conveyor_br, columns=['Karimun', 'Current RH', 'Last Rpl HR'])
+    conveyor_br['Utilization (hrs)'] = conveyor_br['Current RH']-conveyor_br['Last Rpl HR']
+    conveyor_br['Utilization %'] = [round(conveyor_br['Utilization (hrs)'][0]/5000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][1]/5000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][2]/10000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][3]/10000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][4]/10000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][5]/5000*100,0),
+                                round(conveyor_br['Utilization (hrs)'][6]/10000*100,0),]
+
+    util = []
+    for i in conveyor_br['Utilization %']:
+        util.append(min(i, 100))
+    conveyor_br['Utilization'] = util
+    conveyor_br['Max'] = 100
+
+    # Alternator OH
+    alternator_oh = [['GEN01', last['Last Overhaul GEN01'],],
+                    ['GEN02', last['Last Overhaul GEN02'],],
+                    ['GEN03', last['Last Overhaul GEN03'],],
+                    ['GEN04', last['Last Overhaul GEN04'],]]
+    alternator_oh = pd.DataFrame(alternator_oh, columns=['Karimun', 'Last Overhaul (Date)',])
+
+    last_oh = []
+    for i in alternator_oh['Last Overhaul (Date)']:
+        last_oh.append(i+relativedelta(months=60))
+    alternator_oh['Next Overhaul (Date)'] = last_oh
+
+    alternator_oh['Todays Date'] = date.today()
+    alternator_oh['Todays Date'] = alternator_oh['Todays Date'].astype('datetime64[ns]')
+    alternator_oh['Time to Go'] = (alternator_oh['Next Overhaul (Date)'] - alternator_oh['Todays Date']).dt.days.astype('int64')
+    alternator_oh['Five Years in Days'] = 1827
+    alternator_oh['Utilization %'] = round((alternator_oh['Five Years in Days']-alternator_oh['Time to Go'])/ \
+                                    alternator_oh['Five Years in Days']*100,0)
+
+    util = []
+    for i in alternator_oh['Utilization %']:
+        util.append(min(i, 100))
+    alternator_oh['Utilization'] = util
+    alternator_oh['Max'] = 100
+
+    #Critical Spare
+    conveyor = last['Conveyor']
+    df_conveyor = pd.DataFrame({'names' : ['progress',' '],
+                    'values' :  [conveyor, 100 - conveyor]})
+    
+    def shape_cu(value):
+        shape=''
+        if value == 'Green': shape="img/green check.png"
+        elif value == 'Yellow': shape="img/yellow cross.png"
+        elif value == 'Red': shape="img/red cross.png"
+        elif value == 'Gray': shape="img/gray blank.png"
+        return(shape)
+
+    def shape_cs(value):
+        shape=''
+        if value<=(50) : shape="img/red cross.png"
+        elif value<=(80) : shape="img/yellow cross.png"
+        elif value<=100 : shape="img/green check.png"
+        else : shape="img/gray blank.png"
+        return(shape)
+
+    def col_day_delta(value):
+        col=''
+        if value<=180 : col="img/red calendar.png"
+        elif value<=365 : col="img/yellow calendar.png"
+        else: col="img/green calendar.png"
+        return(col)
+
+    t_karimun = last['Next Docking Intermediate Survey (IS)']
+    ConMakerShape_karimun = shape_cu(last['Conveyor-Maker Check-Up'])
+    CraneMakerShape_karimun = shape_cu(last['Crane-Maker Check-Up'])
+    EngMakerShape_karimun = shape_cu(last['Engine-Maker Check-Up'])
+    OthersShape_karimun = shape_cu(last['Others'])
+    NextDockingCol_karimun = col_day_delta((last['Next Docking Intermediate Survey (IS)'] - pd.Timestamp.today()).days)
+    ConSpareShape_karimun = shape_cu(last['Conveyor Belt Spares'])
+    CraneSpareShape_karimun = shape_cu(last['Crane-Wire Rope Spares']) 
+    CraneShape_karimun = shape_cs(last['Crane'])
+    ConShape_karimun = shape_cs(last['Conveyor'])
+    EngShape_karimun = shape_cs(last['Engine'])
+
+    #Chart
+    karimun_toh = plot_toh(engine_goh['TOH'])
+    karimun_goh = plot_goh(engine_goh['GOH'])
+    karimun_crane_1 = plot_wr1_dk(wire_rope_c1['Utilization'], wire_rope_c1)
+    karimun_crane_2 = plot_wr2_dk(wire_rope_c2['Utilization'], wire_rope_c2)
+    karimun_cbu = plot_cbr(conveyor_br['Utilization'], 'Karimun', conveyor_br)
+    karimun_au = plot_aoh(alternator_oh['Utilization'], 'Karimun', alternator_oh)
+    karimun_cs_conveyor = plot_cs(df_conveyor)
+
+    #Save Img
+    pio.write_image(karimun_toh, 'img/toh Bulk Karimun.png')
+    pio.write_image(karimun_goh, 'img/goh Bulk Karimun.png')
+    pio.write_image(karimun_crane_1, 'img/crane_1 Bulk Karimun.png')
+    pio.write_image(karimun_crane_2, 'img/crane_2 Bulk Karimun.png')
+    pio.write_image(karimun_cbu, 'img/cbu Bulk Karimun.png')
+    pio.write_image(karimun_au, 'img/au Bulk Karimun.png')
+    pio.write_image(karimun_cs_conveyor, 'img/cs_conveyor Bulk Karimun.png')
+
+    ###################### Dewata ######################
+
+
+    ###################### Sumba ######################
+
+
+    ###################### Java ######################
+
+
+    ###################### Borneo ######################
+
+
+    ###################### Celebes ######################
+
+
+    ###################### Natuna ######################
+
+
     def to_pptx(bytes_io):
         # Create presentation
         pptx = path + '//' + 'slide_master.pptx'
+        # prs = Presentation(pptx)
         prs = Presentation(pptx)
 
         # define slidelayouts 
@@ -341,9 +729,125 @@ def update_charts(n_clicks, data):
         slide1.shapes.add_picture(ConShape_sumatra, Cm(29.8), Cm(12.9))
         slide1.shapes.add_picture(EngShape_sumatra, Cm(32.1), Cm(12.9))
 
+        # slide2 Bulk Derawan
+        slide2.placeholders[10].text = 'EQUIPMENT DASHBOARD \n Bulk Derawan'
+        slide2.shapes.add_picture('img/crane_1 Bulk Derawan.png', Cm(0.75), Cm(3.15), Cm(13.75), Cm(4))
+        slide2.shapes.add_picture('img/crane_2 Bulk Derawan.png', Cm(0.75), Cm(7.4), Cm(13.75), Cm(4))
+        slide2.shapes.add_picture('img/toh Bulk Derawan.png', Cm(14.75), Cm(3.15), Cm(11), Cm(4))
+        slide2.shapes.add_picture('img/goh Bulk Derawan.png', Cm(14.75), Cm(7.4), Cm(11), Cm(4))
+        slide2.shapes.add_picture('img/cbu Bulk Derawan.png', Cm(0.75), Cm(11.65), Cm(13.75), Cm(5.5))
+        slide2.shapes.add_picture('img/au Bulk Derawan.png', Cm(14.75), Cm(11.65), Cm(11), Cm(5.5))
+        slide2.shapes.add_picture('img/cs_conveyor Bulk Derawan.png', Cm(28.5), Cm(14.2), Cm(2), Cm(2.5))
+
+
+        slide2.placeholders[12].text = 'Conveyor-Maker Check-Up'
+        slide2.placeholders[13].text = 'Crane-Maker Check-Up'
+        slide2.placeholders[14].text = 'Engine-Maker Check-Up'
+        slide2.placeholders[15].text = 'Others-Shi ELD'
+        slide2.placeholders[16].text = 'Next Docking \n Intermediate \n Survey (IS)'
+        slide2.placeholders[17].text = 'Conveyor Belt Spares'
+        slide2.placeholders[18].text = 'Crane-Wire Rope Spares'
+        slide2.placeholders[19].text = 'Crane'
+        slide2.placeholders[20].text = 'Conv.'
+        slide2.placeholders[21].text = 'Eng.'
+
+        cal = slide2.shapes.add_picture(NextDockingCol_derawan, Cm(30), Cm(7.7))
+
+        thn = slide2.shapes.add_textbox(Cm(30.6), Cm(8), 1, 0.5)
+        thn = thn.text_frame.paragraphs[0]
+        thn.text = t_derawan.strftime("%Y")
+        font = thn.font
+        font.bold = True
+        font.name = 'Arial Black'
+        font.size = Pt(14)
+
+        tgl = slide2.shapes.add_textbox(Cm(30.8), Cm(8.6), 1, 0.5)
+        tgl = tgl.text_frame.paragraphs[0]
+        tgl.text = t_derawan.strftime("%d")
+        font = tgl.font
+        font.bold = True
+        font.name = 'Arial Black'
+        font.size = Pt(18)
+
+        bln = slide2.shapes.add_textbox(Cm(30.8), Cm(9.35), 1, 0.5)
+        bln = bln.text_frame.paragraphs[0]
+        bln.text = t_derawan.strftime("%b")
+        font = bln.font
+        font.name = 'Arial'
+        font.size = Pt(14)
+
+        slide2.shapes.add_picture(ConMakerShape_derawan, Cm(32.1), Cm(3.3))
+        slide2.shapes.add_picture(CraneMakerShape_derawan, Cm(32.1), Cm(4.4))
+        slide2.shapes.add_picture(EngMakerShape_derawan, Cm(32.1), Cm(5.5))
+        slide2.shapes.add_picture(OthersShape_derawan, Cm(32.1), Cm(6.6))
+        slide2.shapes.add_picture(ConSpareShape_derawan, Cm(32.1), Cm(10.7))
+        slide2.shapes.add_picture(CraneSpareShape_derawan, Cm(32.1), Cm(11.8))
+        slide2.shapes.add_picture(CraneShape_derawan, Cm(27.4), Cm(12.9))
+        slide2.shapes.add_picture(ConShape_derawan, Cm(29.8), Cm(12.9))
+        slide2.shapes.add_picture(EngShape_derawan, Cm(32.1), Cm(12.9))
+
+        # slide3 Bulk Karimun
+        slide3.placeholders[10].text = 'EQUIPMENT DASHBOARD \n Bulk Karimun'
+        slide3.shapes.add_picture('img/crane_1 Bulk Karimun.png', Cm(0.75), Cm(3.15), Cm(13.75), Cm(4))
+        slide3.shapes.add_picture('img/crane_2 Bulk Karimun.png', Cm(0.75), Cm(7.4), Cm(13.75), Cm(4))
+        slide3.shapes.add_picture('img/toh Bulk Karimun.png', Cm(14.75), Cm(3.15), Cm(11), Cm(4))
+        slide3.shapes.add_picture('img/goh Bulk Karimun.png', Cm(14.75), Cm(7.4), Cm(11), Cm(4))
+        slide3.shapes.add_picture('img/cbu Bulk Karimun.png', Cm(0.75), Cm(11.65), Cm(13.75), Cm(5.5))
+        slide3.shapes.add_picture('img/au Bulk Karimun.png', Cm(14.75), Cm(11.65), Cm(11), Cm(5.5))
+        slide3.shapes.add_picture('img/cs_conveyor Bulk Karimun.png', Cm(28.5), Cm(14.2), Cm(2), Cm(2.5))
+
+
+        slide3.placeholders[12].text = 'Conveyor-Maker Check-Up'
+        slide3.placeholders[13].text = 'Crane-Maker Check-Up'
+        slide3.placeholders[14].text = 'Engine-Maker Check-Up'
+        slide3.placeholders[15].text = 'Others-Shi ELD'
+        slide3.placeholders[16].text = 'Next Docking \n Intermediate \n Survey (IS)'
+        slide3.placeholders[17].text = 'Conveyor Belt Spares'
+        slide3.placeholders[18].text = 'Crane-Wire Rope Spares'
+        slide3.placeholders[19].text = 'Crane'
+        slide3.placeholders[20].text = 'Conv.'
+        slide3.placeholders[21].text = 'Eng.'
+
+        cal = slide3.shapes.add_picture(NextDockingCol_karimun, Cm(30), Cm(7.7))
+
+        thn = slide3.shapes.add_textbox(Cm(30.6), Cm(8), 1, 0.5)
+        thn = thn.text_frame.paragraphs[0]
+        thn.text = t_karimun.strftime("%Y")
+        font = thn.font
+        font.bold = True
+        font.name = 'Arial Black'
+        font.size = Pt(14)
+
+        tgl = slide3.shapes.add_textbox(Cm(30.8), Cm(8.6), 1, 0.5)
+        tgl = tgl.text_frame.paragraphs[0]
+        tgl.text = t_karimun.strftime("%d")
+        font = tgl.font
+        font.bold = True
+        font.name = 'Arial Black'
+        font.size = Pt(18)
+
+        bln = slide3.shapes.add_textbox(Cm(30.8), Cm(9.35), 1, 0.5)
+        bln = bln.text_frame.paragraphs[0]
+        bln.text = t_karimun.strftime("%b")
+        font = bln.font
+        font.name = 'Arial'
+        font.size = Pt(14)
+
+        slide3.shapes.add_picture(ConMakerShape_karimun, Cm(32.1), Cm(3.3))
+        slide3.shapes.add_picture(CraneMakerShape_karimun, Cm(32.1), Cm(4.4))
+        slide3.shapes.add_picture(EngMakerShape_karimun, Cm(32.1), Cm(5.5))
+        slide3.shapes.add_picture(OthersShape_karimun, Cm(32.1), Cm(6.6))
+        slide3.shapes.add_picture(ConSpareShape_karimun, Cm(32.1), Cm(10.7))
+        slide3.shapes.add_picture(CraneSpareShape_karimun, Cm(32.1), Cm(11.8))
+        slide3.shapes.add_picture(CraneShape_karimun, Cm(27.4), Cm(12.9))
+        slide3.shapes.add_picture(ConShape_karimun, Cm(29.8), Cm(12.9))
+        slide3.shapes.add_picture(EngShape_karimun, Cm(32.1), Cm(12.9))
+
         prs.save(bytes_io)    
 
-    return dcc.send_bytes(to_pptx, 'Equipment Dashboard.pptx')
+        # return dcc.send_bytes(to_pptx, 'Equipment Dashboard.pptx')
+    
+    return dcc.send_bytes(to_pptx, 'Equipment Dashboard.pptx'), download_date
 
 
 ######################
