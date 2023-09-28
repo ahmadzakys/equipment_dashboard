@@ -294,10 +294,10 @@ def update_charts(n_clicks, data):
                     ['EW RHOL', last['EW RHOL CR01'], last['CRANE 1']]]
     wire_rope_c1 = pd.DataFrame(wire_rope_c1, columns=['Crane 1', 'Last Replacement', 'Current RH'])
     wire_rope_c1['Utilization RH'] = wire_rope_c1['Current RH']-wire_rope_c1['Last Replacement']
-    wire_rope_c1['Utilization %'] = [round(wire_rope_c1['Utilization RH'][0]/2500*100,0),
-                                    round(wire_rope_c1['Utilization RH'][1]/2500*100,0),
-                                    round(wire_rope_c1['Utilization RH'][2]/2500*100,0),
-                                    round(wire_rope_c1['Utilization RH'][3]/2500*100,0),
+    wire_rope_c1['Utilization %'] = [round(wire_rope_c1['Utilization RH'][0]/3500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][1]/3500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][2]/3500*100,0),
+                                    round(wire_rope_c1['Utilization RH'][3]/3500*100,0),
                                     round(wire_rope_c1['Utilization RH'][4]/1200*100,0),]
     util1 = []
     for i in wire_rope_c1['Utilization %']:
@@ -313,10 +313,10 @@ def update_charts(n_clicks, data):
                     ['EW RHOL', last['EW RHOL CR02'], last['CRANE 2']]]
     wire_rope_c2 = pd.DataFrame(wire_rope_c2, columns=['Crane 2', 'Last Replacement', 'Current RH'])
     wire_rope_c2['Utilization RH'] = wire_rope_c2['Current RH']-wire_rope_c2['Last Replacement']
-    wire_rope_c2['Utilization %'] = [round(wire_rope_c2['Utilization RH'][0]/2500*100,0),
-                                    round(wire_rope_c2['Utilization RH'][1]/2500*100,0),
-                                    round(wire_rope_c2['Utilization RH'][2]/2500*100,0),
-                                    round(wire_rope_c2['Utilization RH'][3]/2500*100,0),
+    wire_rope_c2['Utilization %'] = [round(wire_rope_c2['Utilization RH'][0]/3500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][1]/3500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][2]/3500*100,0),
+                                    round(wire_rope_c2['Utilization RH'][3]/3500*100,0),
                                     round(wire_rope_c2['Utilization RH'][4]/1200*100,0),]
     util2 = []
     for i in wire_rope_c2['Utilization %']:
